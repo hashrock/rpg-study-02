@@ -3,6 +3,7 @@ import type { GameState } from './types'
 import { type Character, type Enemy, type Party } from './types'
 import { createCaveBoss, createInitialParty, hireCandidates } from './data'
 import { advanceTurn, applyAttack, isBattleOver, selectFirstAlive, startBattle } from './logic'
+import { CharacterSpriteComponent, EnemySpriteComponent } from './CharacterSprite'
 
 function PartyView({ party }: { party: Party }) {
   const members: Character[] = [party.hero, ...party.companions]
@@ -11,14 +12,15 @@ function PartyView({ party }: { party: Party }) {
       <h3>パーティ</h3>
       <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
         {members.map((m) => (
-          <div key={m.id} style={{ border: '1px solid #555', borderRadius: 8, padding: '0.5rem 0.75rem', minWidth: 120 }}>
-            <div>{m.name}{m.isHero ? '（主人公）' : ''}</div>
+          <div key={m.id} style={{ border: '1px solid #555', borderRadius: 8, padding: '0.5rem 0.75rem', minWidth: 120, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <CharacterSpriteComponent character={m} size={48} />
+            <div style={{ marginTop: '0.5rem' }}>{m.name}{m.isHero ? '（主人公）' : ''}</div>
             <div>HP {m.hp}/{m.maxHp}</div>
             <div>攻:{m.atk} 速:{m.spd}</div>
           </div>
         ))}
         {Array.from({ length: Math.max(0, 3 - party.companions.length) }).map((_, i) => (
-          <div key={`empty-${i}`} style={{ border: '1px dashed #444', borderRadius: 8, padding: '0.5rem 0.75rem', minWidth: 120, color: '#888' }}>
+          <div key={`empty-${i}`} style={{ border: '1px dashed #444', borderRadius: 8, padding: '0.5rem 0.75rem', minWidth: 120, color: '#888', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 140 }}>
             空き枠
           </div>
         ))}
@@ -42,13 +44,16 @@ function TownView({ state, onEnterCave, onHire }: {
       <div style={{ marginTop: '1rem' }}>
         <h3>酒場（仲間を雇う）</h3>
         {!hasRoom && <div style={{ color: '#aaa' }}>仲間はこれ以上雇えません（最大3人）</div>}
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           {candidates.map((c) => {
             const alreadyIn = [state.party.hero, ...state.party.companions].some((m) => m.id === c.id)
             return (
-              <button key={c.id} disabled={!hasRoom || alreadyIn} onClick={() => onHire(c)}>
-                {c.name} を雇う
-              </button>
+              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                <CharacterSpriteComponent character={c} size={56} />
+                <button disabled={!hasRoom || alreadyIn} onClick={() => onHire(c)}>
+                  {c.name} を雇う
+                </button>
+              </div>
             )
           })}
         </div>
@@ -73,18 +78,30 @@ function BattleView({ state, onAllyAction, onEnemyAuto }: {
   return (
     <div>
       <h2>バトル</h2>
-      <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '3rem', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div>
           <h3>味方</h3>
-          {battle.allies.map((a, i) => (
-            <div key={`a-${i}`} style={{ opacity: a.hp > 0 ? 1 : 0.5 }}>• {a.name} HP {a.hp}/{a.maxHp}</div>
-          ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+            {battle.allies.map((a, i) => (
+              <div key={`a-${i}`} style={{ opacity: a.hp > 0 ? 1 : 0.5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', border: a.hp > 0 ? '2px solid #4a90e2' : '2px solid #888', borderRadius: 8, padding: '0.75rem' }}>
+                <CharacterSpriteComponent character={a} size={64} />
+                <div>{a.name}</div>
+                <div>HP {a.hp}/{a.maxHp}</div>
+              </div>
+            ))}
+          </div>
         </div>
         <div>
           <h3>敵</h3>
-          {battle.enemies.map((e, i) => (
-            <div key={`e-${i}`} style={{ opacity: e.hp > 0 ? 1 : 0.5 }}>• {e.name} HP {e.hp}/{e.maxHp}</div>
-          ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
+            {battle.enemies.map((e, i) => (
+              <div key={`e-${i}`} style={{ opacity: e.hp > 0 ? 1 : 0.5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', border: e.hp > 0 ? '2px solid #ff4444' : '2px solid #888', borderRadius: 8, padding: '0.75rem' }}>
+                <EnemySpriteComponent enemy={e} size={e.isBoss ? 96 : 64} />
+                <div>{e.name}{e.isBoss ? '（ボス）' : ''}</div>
+                <div>HP {e.hp}/{e.maxHp}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
