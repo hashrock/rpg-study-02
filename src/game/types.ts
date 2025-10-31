@@ -33,8 +33,9 @@ export type Enemy = {
   isBoss?: boolean;
 };
 
-export type Location = "TOWN" | "CAVE";
-export type Mode = "FIELD" | "BATTLE" | "CLEAR" | "GAMEOVER";
+export type Location = "TOWN" | "CAVE" | "DUNGEON";
+export type Mode = "FIELD" | "BATTLE" | "CLEAR" | "GAMEOVER" | "EVENT";
+export type DungeonEventType = "water" | "midboss" | "finalboss" | "encounter" | "none";
 
 export type Party = {
   hero: Character;
@@ -61,9 +62,23 @@ export type BattleState = {
   pendingAction?: BattleAction;
 };
 
+export type DungeonState = {
+  step: number; // 0-20
+  maxStep: number;
+  visitedSteps: number[]; // 訪れたステップのリスト
+};
+
+export type EventState = {
+  type: DungeonEventType;
+  message: string;
+  enemy?: Enemy;
+};
+
 export type GameState = {
   location: Location;
   mode: Mode;
   party: Party;
   battle?: BattleState;
+  dungeon?: DungeonState;
+  event?: EventState;
 };

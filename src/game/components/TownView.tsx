@@ -8,10 +8,12 @@ import { CharacterSpriteComponent } from "../CharacterSprite";
 export function TownView({
   state,
   onEnterCave,
+  onEnterDungeon,
   onHire,
 }: {
   state: GameState;
   onEnterCave: () => void;
+  onEnterDungeon: () => void;
   onHire: (c: Character) => void;
 }) {
   const candidates = useMemo(() => hireCandidates, []);
@@ -63,8 +65,9 @@ export function TownView({
           })}
         </div>
       </div>
-      <div style={{ marginTop: "1.5rem" }}>
+      <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
         <button onClick={onEnterCave}>洞窟へ行く</button>
+        <button onClick={onEnterDungeon}>ダンジョンへ行く</button>
       </div>
     </div>
   );

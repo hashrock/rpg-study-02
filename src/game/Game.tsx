@@ -10,10 +10,18 @@ import {
   startBattle,
   useSkill,
 } from "./logic";
+import {
+  createDungeon,
+  advanceDungeonStep,
+  checkDungeonEvent,
+  campAtWater,
+} from "./dungeonLogic";
 import { TownView } from "./components/TownView";
 import { BattleView } from "./components/BattleView";
 import { ClearView } from "./components/ClearView";
 import { GameOverView } from "./components/GameOverView";
+import { DungeonView } from "./components/DungeonView";
+import { EventView } from "./components/EventView";
 
 export default function Game() {
   const [state, setState] = useState<GameState>(() => ({
@@ -53,6 +61,86 @@ export default function Game() {
     }));
   }
 
+  function enterDungeon() {
+    setState((prev) => ({
+      ...prev,
+      location: "DUNGEON",
+      mode: "FIELD",
+      dungeon: createDungeon(),
+    }));
+  }
+
+  function handleDungeonMoveForward() {
+    setState((prev) => {
+      if (!prev.dungeon) return prev;
+      const newDungeon = advanceDungeonStep(prev.dungeon, "forward");
+      const event = checkDungeonEvent(newDungeon.step, newDungeon);
+
+      if (event) {
+        return {
+          ...prev,
+          dungeon: newDungeon,
+          mode: "EVENT",
+          event,
+        };
+      }
+
+      return {
+        ...prev,
+        dungeon: newDungeon,
+      };
+    });
+  }
+
+  function handleDungeonMoveBackward() {
+    setState((prev) => {
+      if (!prev.dungeon) return prev;
+      const newDungeon = advanceDungeonStep(prev.dungeon, "backward");
+      return {
+        ...prev,
+        dungeon: newDungeon,
+      };
+    });
+  }
+
+  function handleEventContinue() {
+    setState((prev) => ({
+      ...prev,
+      mode: "FIELD",
+      event: undefined,
+    }));
+  }
+
+  function handleEventBattle() {
+    setState((prev) => {
+      if (!prev.event || !prev.event.enemy) return prev;
+      return {
+        ...prev,
+        mode: "BATTLE",
+        battle: startBattle(prev.party, [prev.event.enemy]),
+        event: undefined,
+      };
+    });
+  }
+
+  function handleCamp() {
+    setState((prev) => ({
+      ...prev,
+      party: campAtWater(prev.party),
+      mode: "FIELD",
+      event: undefined,
+    }));
+  }
+
+  function returnToTownFromDungeon() {
+    setState((prev) => ({
+      ...prev,
+      location: "TOWN",
+      mode: "FIELD",
+      dungeon: undefined,
+    }));
+  }
+
   function runEnemyTurn() {
     setState((prev) => {
       if (prev.mode !== "BATTLE" || !prev.battle) return prev;
@@ -76,6 +164,15 @@ export default function Game() {
       const over = isBattleOver(b);
       if (over.over) {
         if (over.winner === "allies") {
+          // ダンジョンの大ボスを倒した場合はクリア
+          const isFinalBoss = b.enemies.some((e) => e.id === "finalboss");
+          if (isFinalBoss && prev.location === "DUNGEON") {
+            return { ...prev, mode: "CLEAR", battle: { ...b } };
+          }
+          // ダンジョンのバトル終了後はダンジョンに戻る
+          if (prev.location === "DUNGEON") {
+            return { ...prev, mode: "FIELD", battle: undefined };
+          }
           return { ...prev, mode: "CLEAR", battle: { ...b } };
         } else {
           return { ...prev, mode: "GAMEOVER", battle: { ...b } };
@@ -144,6 +241,15 @@ export default function Game() {
       const over = isBattleOver(b);
       if (over.over) {
         if (over.winner === "allies") {
+          // ダンジョンの大ボスを倒した場合はクリア
+          const isFinalBoss = b.enemies.some((e) => e.id === "finalboss");
+          if (isFinalBoss && prev.location === "DUNGEON") {
+            return { ...prev, mode: "CLEAR", battle: { ...b } };
+          }
+          // ダンジョンのバトル終了後はダンジョンに戻る
+          if (prev.location === "DUNGEON") {
+            return { ...prev, mode: "FIELD", battle: undefined };
+          }
           return { ...prev, mode: "CLEAR", battle: { ...b } };
         } else {
           return { ...prev, mode: "GAMEOVER", battle: { ...b } };
@@ -156,9 +262,30 @@ export default function Game() {
 
   return (
     <div>
-      <h1>コマンドRPG（街と洞窟）</h1>
+      <h1>コマンドRPG（街と洞窟とダンジョン）</h1>
       {state.mode === "FIELD" && state.location === "TOWN" && (
-        <TownView state={state} onEnterCave={enterCave} onHire={handleHire} />
+        <TownView
+          state={state}
+          onEnterCave={enterCave}
+          onEnterDungeon={enterDungeon}
+          onHire={handleHire}
+        />
+      )}
+      {state.mode === "FIELD" && state.location === "DUNGEON" && state.dungeon && (
+        <DungeonView
+          state={state}
+          onMoveForward={handleDungeonMoveForward}
+          onMoveBackward={handleDungeonMoveBackward}
+          onReturnToTown={returnToTownFromDungeon}
+        />
+      )}
+      {state.mode === "EVENT" && state.event && (
+        <EventView
+          state={state}
+          onContinue={handleEventContinue}
+          onStartBattle={handleEventBattle}
+          onCamp={handleCamp}
+        />
       )}
       {state.mode === "BATTLE" && state.battle && (
         <BattleView
