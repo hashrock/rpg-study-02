@@ -4,6 +4,7 @@ import {
   CharacterSpriteComponent,
   EnemySpriteComponent,
 } from "../CharacterSprite";
+import { items, getItemQuantity } from "../data";
 
 function BattleStatus({
   allies,
@@ -129,10 +130,13 @@ function CommandSelectView({
   currentActor,
   onSelectAttack,
   onSelectSkill,
+  onSelectItem,
 }: {
   currentActor: NonNullable<GameState["battle"]>["allies"][number];
+  inventory?: GameState["inventory"];
   onSelectAttack: () => void;
   onSelectSkill: () => void;
+  onSelectItem: () => void;
 }) {
   return (
     <div style={{ marginTop: "1rem", minHeight: 80 }}>
@@ -149,6 +153,7 @@ function CommandSelectView({
         >
           <button onClick={onSelectAttack}>こうげき</button>
           <button onClick={onSelectSkill}>特技</button>
+          <button onClick={onSelectItem}>アイテム</button>
         </div>
       </div>
     </div>
@@ -157,12 +162,11 @@ function CommandSelectView({
 
 function SkillSelectView({
   currentActor,
-  battle,
   onBack,
   onSelectSkill,
 }: {
   currentActor: NonNullable<GameState["battle"]>["allies"][number];
-  battle: NonNullable<GameState["battle"]>;
+  battle?: NonNullable<GameState["battle"]>;
   onBack: () => void;
   onSelectSkill: (skillId: string) => void;
 }) {
@@ -276,6 +280,106 @@ function TargetSelectView({
   );
 }
 
+function ItemSelectView({
+  inventory,
+  onBack,
+  onSelectItem,
+}: {
+  inventory: GameState["inventory"];
+  battle?: NonNullable<GameState["battle"]>;
+  onBack: () => void;
+  onSelectItem: (itemId: string) => void;
+}) {
+  const availableItems = items.filter(
+    (item) => getItemQuantity(inventory, item.id) > 0
+  );
+
+  return (
+    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+      <div>
+        <div>アイテム選択</div>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            marginTop: "0.5rem",
+          }}
+        >
+          <button onClick={onBack}>戻る</button>
+          {availableItems.map((item) => {
+            const quantity = getItemQuantity(inventory, item.id);
+            return (
+              <button
+                key={item.id}
+                onClick={() => onSelectItem(item.id)}
+                title={item.description}
+              >
+                {item.name} ×{quantity}
+              </button>
+            );
+          })}
+        </div>
+        {availableItems.length === 0 && (
+          <div style={{ marginTop: "0.5rem" }}>
+            使用可能なアイテムがありません
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ItemTargetSelectView({
+  itemId,
+  battle,
+  onBack,
+  onSelectTarget,
+}: {
+  itemId: string;
+  battle: NonNullable<GameState["battle"]>;
+  onBack: () => void;
+  onSelectTarget: (targetIndex: number) => void;
+}) {
+  const item = items.find((i) => i.id === itemId);
+  const isHeal =
+    item?.effect.type === "heal" || item?.effect.type === "mp_heal";
+
+  return (
+    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+      <div>
+        <div>ターゲット選択：{item?.name}</div>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            marginTop: "0.5rem",
+          }}
+        >
+          <button onClick={onBack}>戻る</button>
+          {isHeal &&
+            battle.allies.map((a, i) => (
+              <button
+                key={`item-heal-${i}`}
+                disabled={
+                  a.hp <= 0 ||
+                  (item?.effect.type === "heal" && a.hp >= a.maxHp) ||
+                  (item?.effect.type === "mp_heal" && a.mp >= a.maxMp)
+                }
+                onClick={() => onSelectTarget(i)}
+              >
+                {item?.name} → {a.name}
+              </button>
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EnemyTurnView({ onAdvance }: { onAdvance: () => void }) {
   return (
     <div style={{ marginTop: "1rem", minHeight: 80 }}>
@@ -293,6 +397,7 @@ export function BattleView({
   state,
   onAllyAction,
   onEnemyAuto,
+  onUseItem,
 }: {
   state: GameState;
   onAllyAction: (
@@ -301,6 +406,7 @@ export function BattleView({
     skillId?: string
   ) => void;
   onEnemyAuto: () => void;
+  onUseItem: (itemId: string, targetIndex?: number) => void;
 }) {
   const battle = state.battle!;
   const actor = battle.turnOrder[battle.turnIndex];
@@ -308,36 +414,53 @@ export function BattleView({
   const isEnemyTurn =
     actor.kind === "enemy" && battle.enemies[actor.index].hp > 0;
   const currentActor = isAllyTurn ? battle.allies[actor.index] : null;
-  const [commandMode, setCommandMode] = useState<"select" | "skill" | "target">(
-    "select"
-  );
+  const [commandMode, setCommandMode] = useState<
+    "select" | "skill" | "target" | "item" | "itemTarget"
+  >("select");
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   // ターンが変わったらコマンドモードをリセット
   useEffect(() => {
     setCommandMode("select");
     setSelectedSkillId(null);
+    setSelectedItemId(null);
   }, [battle.turnIndex]);
 
   const handleSelectAttack = () => setCommandMode("target");
   const handleSelectSkill = () => setCommandMode("skill");
+  const handleSelectItem = () => setCommandMode("item");
   const handleBackToSelect = () => {
     setCommandMode("select");
     setSelectedSkillId(null);
+    setSelectedItemId(null);
   };
   const handleBackToSkill = () => {
     setCommandMode("skill");
     setSelectedSkillId(null);
   };
+  const handleBackToItem = () => {
+    setCommandMode("item");
+    setSelectedItemId(null);
+  };
   const handleSkillSelect = (skillId: string) => {
     setSelectedSkillId(skillId);
     setCommandMode("target");
+  };
+  const handleItemSelect = (itemId: string) => {
+    setSelectedItemId(itemId);
+    setCommandMode("itemTarget");
   };
   const handleTargetSelect = (targetIndex: number, skillId?: string) => {
     if (skillId) {
       onAllyAction("skill", targetIndex, skillId);
     } else {
       onAllyAction("attack", targetIndex);
+    }
+  };
+  const handleItemTargetSelect = (targetIndex: number) => {
+    if (selectedItemId) {
+      onUseItem(selectedItemId, targetIndex);
     }
   };
 
@@ -348,8 +471,46 @@ export function BattleView({
         <BattleStatus allies={battle.allies} enemies={battle.enemies} />
         <CommandSelectView
           currentActor={currentActor}
+          inventory={state.inventory}
           onSelectAttack={handleSelectAttack}
           onSelectSkill={handleSelectSkill}
+          onSelectItem={handleSelectItem}
+        />
+        <BattleLog log={battle.log} />
+      </div>
+    );
+  }
+
+  if (isAllyTurn && currentActor && commandMode === "item") {
+    return (
+      <div>
+        <h2>バトル</h2>
+        <BattleStatus allies={battle.allies} enemies={battle.enemies} />
+        <ItemSelectView
+          inventory={state.inventory}
+          onBack={handleBackToSelect}
+          onSelectItem={handleItemSelect}
+        />
+        <BattleLog log={battle.log} />
+      </div>
+    );
+  }
+
+  if (
+    isAllyTurn &&
+    currentActor &&
+    commandMode === "itemTarget" &&
+    selectedItemId
+  ) {
+    return (
+      <div>
+        <h2>バトル</h2>
+        <BattleStatus allies={battle.allies} enemies={battle.enemies} />
+        <ItemTargetSelectView
+          itemId={selectedItemId}
+          battle={battle}
+          onBack={handleBackToItem}
+          onSelectTarget={handleItemTargetSelect}
         />
         <BattleLog log={battle.log} />
       </div>
@@ -363,7 +524,6 @@ export function BattleView({
         <BattleStatus allies={battle.allies} enemies={battle.enemies} />
         <SkillSelectView
           currentActor={currentActor}
-          battle={battle}
           onBack={handleBackToSelect}
           onSelectSkill={handleSkillSelect}
         />

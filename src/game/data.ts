@@ -1,4 +1,4 @@
-import type { Character, Enemy, Party, Skill } from './types'
+import type { Character, Enemy, Party, Skill, Item, Inventory } from './types'
 
 // 共通スキル定義
 const heroSkills: Skill[] = [
@@ -144,5 +144,67 @@ export function createFinalBoss(): Enemy {
 
 // 水場があるステップ（5, 12, 17ステップ目）
 export const WATER_STEPS = [5, 12, 17]
+
+// アイテム定義
+export const items: Item[] = [
+  { id: 'potion', name: '回復薬', description: 'HPを30回復', effect: { type: 'heal', value: 30 } },
+  { id: 'high_potion', name: '高級回復薬', description: 'HPを60回復', effect: { type: 'heal', value: 60 } },
+  { id: 'mp_potion', name: 'MPポーション', description: 'MPを20回復', effect: { type: 'mp_heal', value: 20 } },
+  { id: 'herb', name: '薬草', description: 'HPを15回復', effect: { type: 'heal', value: 15 } },
+]
+
+export function getItemById(itemId: string): Item | undefined {
+  return items.find(item => item.id === itemId)
+}
+
+export function createEmptyInventory(): Inventory {
+  return { items: [] }
+}
+
+export function addItemToInventory(inventory: Inventory, itemId: string, quantity: number = 1): Inventory {
+  const existing = inventory.items.find(i => i.itemId === itemId)
+  if (existing) {
+    return {
+      ...inventory,
+      items: inventory.items.map(i =>
+        i.itemId === itemId ? { ...i, quantity: i.quantity + quantity } : i
+      )
+    }
+  }
+  return {
+    ...inventory,
+    items: [...inventory.items, { itemId, quantity }]
+  }
+}
+
+export function removeItemFromInventory(inventory: Inventory, itemId: string, quantity: number = 1): Inventory {
+  const existing = inventory.items.find(i => i.itemId === itemId)
+  if (!existing || existing.quantity < quantity) {
+    return inventory
+  }
+  if (existing.quantity === quantity) {
+    return {
+      ...inventory,
+      items: inventory.items.filter(i => i.itemId !== itemId)
+    }
+  }
+  return {
+    ...inventory,
+    items: inventory.items.map(i =>
+      i.itemId === itemId ? { ...i, quantity: i.quantity - quantity } : i
+    )
+  }
+}
+
+export function getItemQuantity(inventory: Inventory, itemId: string): number {
+  const item = inventory.items.find(i => i.itemId === itemId)
+  return item ? item.quantity : 0
+}
+
+// ランダムなアイテムを生成（採集用）
+export function getRandomItem(): Item {
+  const commonItems = items.filter(i => i.id === 'potion' || i.id === 'herb' || i.id === 'mp_potion')
+  return commonItems[Math.floor(Math.random() * commonItems.length)]
+}
 
 

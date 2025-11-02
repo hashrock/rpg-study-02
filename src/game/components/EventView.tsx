@@ -39,6 +39,9 @@ export function EventView({
         {(event.type === "midboss" || event.type === "finalboss" || event.type === "encounter") && (
           <button onClick={onStartBattle}>戦闘開始</button>
         )}
+        {event.type === "none" && (
+          <button onClick={onContinue}>続ける</button>
+        )}
       </div>
     </div>
   );

@@ -71,6 +71,7 @@ export type DungeonState = {
   step: number; // 0-20
   maxStep: number;
   visitedSteps: number[]; // 訪れたステップのリスト
+  canCollectItem: boolean; // このマスでアイテム採集が可能かどうか
 };
 
 export type EventState = {
@@ -79,11 +80,27 @@ export type EventState = {
   enemy?: Enemy;
 };
 
+export type Item = {
+  id: string;
+  name: string;
+  description: string;
+  effect: {
+    type: "heal" | "mp_heal";
+    value: number;
+  };
+};
+
+export type Inventory = {
+  items: { itemId: string; quantity: number }[];
+};
+
 export type GameState = {
   location: Location;
   mode: Mode;
   party: Party;
+  inventory: Inventory;
   battle?: BattleState;
   dungeon?: DungeonState;
   event?: EventState;
+  collectedItem?: { itemId: string; timestamp: number } | null;
 };

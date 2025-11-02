@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { GameState } from "./types";
 import { type Character, type Enemy } from "./types";
-import { createCaveBoss, createInitialParty } from "./data";
+import { createCaveBoss, createInitialParty, createEmptyInventory, getItemById, removeItemFromInventory, getRandomItem, addItemToInventory } from "./data";
 import {
   advanceTurn,
   applyAttack,
@@ -28,10 +28,11 @@ export default function Game() {
     location: "TOWN",
     mode: "FIELD",
     party: createInitialParty(),
+    inventory: createEmptyInventory(),
   }));
 
   function resetToTown() {
-    setState({ location: "TOWN", mode: "FIELD", party: createInitialParty() });
+    setState({ location: "TOWN", mode: "FIELD", party: createInitialParty(), inventory: createEmptyInventory() });
   }
 
   function handleHire(c: Character) {
@@ -74,20 +75,22 @@ export default function Game() {
     setState((prev) => {
       if (!prev.dungeon) return prev;
       const newDungeon = advanceDungeonStep(prev.dungeon, "forward");
-      const event = checkDungeonEvent(newDungeon.step, newDungeon);
+      const event = checkDungeonEvent(newDungeon.step, newDungeon, prev.inventory);
 
-      if (event) {
+      if (event.event) {
         return {
           ...prev,
           dungeon: newDungeon,
           mode: "EVENT",
-          event,
+          event: event.event,
+          inventory: event.inventory,
         };
       }
 
       return {
         ...prev,
         dungeon: newDungeon,
+        inventory: event.inventory,
       };
     });
   }
@@ -96,9 +99,22 @@ export default function Game() {
     setState((prev) => {
       if (!prev.dungeon) return prev;
       const newDungeon = advanceDungeonStep(prev.dungeon, "backward");
+      const event = checkDungeonEvent(newDungeon.step, newDungeon, prev.inventory);
+
+      if (event.event) {
+        return {
+          ...prev,
+          dungeon: newDungeon,
+          mode: "EVENT",
+          event: event.event,
+          inventory: event.inventory,
+        };
+      }
+
       return {
         ...prev,
         dungeon: newDungeon,
+        inventory: event.inventory,
       };
     });
   }
@@ -260,6 +276,116 @@ export default function Game() {
     });
   }
 
+  function handleUseItem(itemId: string, targetIndex?: number) {
+    setState((prev) => {
+      const item = getItemById(itemId);
+      if (!item) return prev;
+
+      // アイテムの所持数を確認
+      const currentQuantity = prev.inventory.items.find(i => i.itemId === itemId)?.quantity || 0;
+      if (currentQuantity <= 0) return prev; // アイテムが無い場合は何もしない
+
+      // インベントリからアイテムを削除
+      const newInventory = removeItemFromInventory(prev.inventory, itemId, 1);
+
+      // 戦闘中の場合
+      if (prev.mode === "BATTLE" && prev.battle) {
+        const b = {
+          ...prev.battle,
+          allies: prev.battle.allies.map((a) => ({ ...a })),
+          enemies: prev.battle.enemies.map((e) => ({ ...e })),
+        };
+
+        // ターゲットが指定されていない場合、最初の生きている味方を選択
+        let actualTargetIndex = targetIndex;
+        if (actualTargetIndex == null) {
+          const firstAlive = selectFirstAlive(b.allies);
+          if (firstAlive == null) return prev;
+          actualTargetIndex = firstAlive;
+        }
+
+        const target = b.allies[actualTargetIndex];
+        if (!target || target.hp <= 0) return prev;
+
+        let message = "";
+        if (item.effect.type === "heal") {
+          const oldHp = target.hp;
+          target.hp = Math.min(target.maxHp, target.hp + item.effect.value);
+          const actualHeal = target.hp - oldHp;
+          message = `${item.name}を使用！${target.name}のHPが${actualHeal}回復！`;
+        } else if (item.effect.type === "mp_heal") {
+          const oldMp = target.mp;
+          target.mp = Math.min(target.maxMp, target.mp + item.effect.value);
+          const actualHeal = target.mp - oldMp;
+          message = `${item.name}を使用！${target.name}のMPが${actualHeal}回復！`;
+        }
+
+        b.log = [...b.log, message];
+        const next = advanceTurn(b);
+        return { ...prev, battle: next, inventory: newInventory };
+      }
+
+      // 移動中の場合
+      if (prev.mode === "FIELD") {
+        const party = { ...prev.party };
+        let target: Character;
+        
+        if (targetIndex != null && targetIndex < [party.hero, ...party.companions].length) {
+          const members = [party.hero, ...party.companions];
+          target = members[targetIndex];
+        } else {
+          target = party.hero; // デフォルトは主人公
+        }
+
+        if (item.effect.type === "heal") {
+          target.hp = Math.min(target.maxHp, target.hp + item.effect.value);
+        } else if (item.effect.type === "mp_heal") {
+          target.mp = Math.min(target.maxMp, target.mp + item.effect.value);
+        }
+
+        // パーティを更新
+        if (targetIndex === 0 || targetIndex == null) {
+          party.hero = target;
+        } else {
+          party.companions[targetIndex - 1] = target;
+        }
+
+        return { ...prev, party, inventory: newInventory };
+      }
+
+      return prev;
+    });
+  }
+
+  function handleCollectItem() {
+    setState((prev) => {
+      if (!prev.dungeon || !prev.dungeon.canCollectItem) return prev;
+      
+      const collectedItem = getRandomItem();
+      const newInventory = addItemToInventory(prev.inventory, collectedItem.id, 1);
+      
+      return {
+        ...prev,
+        dungeon: {
+          ...prev.dungeon,
+          canCollectItem: false, // 採集後は採集不可にする
+        },
+        inventory: newInventory,
+        collectedItem: {
+          itemId: collectedItem.id,
+          timestamp: Date.now(),
+        },
+      };
+    });
+  }
+
+  function clearCollectedItem() {
+    setState((prev) => ({
+      ...prev,
+      collectedItem: null,
+    }));
+  }
+
   return (
     <div>
       <h1>コマンドRPG（街と洞窟とダンジョン）</h1>
@@ -277,6 +403,9 @@ export default function Game() {
           onMoveForward={handleDungeonMoveForward}
           onMoveBackward={handleDungeonMoveBackward}
           onReturnToTown={returnToTownFromDungeon}
+          onUseItem={handleUseItem}
+          onCollectItem={handleCollectItem}
+          onClearCollectedItem={clearCollectedItem}
         />
       )}
       {state.mode === "EVENT" && state.event && (
@@ -292,6 +421,7 @@ export default function Game() {
           state={state}
           onAllyAction={runAllyAction}
           onEnemyAuto={runEnemyTurn}
+          onUseItem={handleUseItem}
         />
       )}
       {state.mode === "CLEAR" && <ClearView onReset={resetToTown} />}
