@@ -35,7 +35,12 @@ export type Enemy = {
 
 export type Location = "TOWN" | "CAVE" | "DUNGEON";
 export type Mode = "FIELD" | "BATTLE" | "CLEAR" | "GAMEOVER" | "EVENT";
-export type DungeonEventType = "water" | "midboss" | "finalboss" | "encounter" | "none";
+export type DungeonEventType =
+  | "water"
+  | "midboss"
+  | "finalboss"
+  | "encounter"
+  | "none";
 
 export type Party = {
   hero: Character;

@@ -244,30 +244,32 @@ function TargetSelectView({
                 <button
                   key={`heal-${i}`}
                   disabled={a.hp <= 0 || a.hp >= a.maxHp}
-                  onClick={() => onSelectTarget(i, selectedSkillId || undefined)}
+                  onClick={() =>
+                    onSelectTarget(i, selectedSkillId || undefined)
+                  }
                 >
                   {skill?.name} → {a.name}
                 </button>
               ))
             : selectedSkillId
-              ? battle.enemies.map((e, i) => (
-                  <button
-                    key={`attack-${i}`}
-                    disabled={e.hp <= 0}
-                    onClick={() => onSelectTarget(i, selectedSkillId)}
-                  >
-                    {skill?.name} → {e.name}
-                  </button>
-                ))
-              : battle.enemies.map((e, i) => (
-                  <button
-                    key={`t-${i}`}
-                    disabled={e.hp <= 0}
-                    onClick={() => onSelectTarget(i)}
-                  >
-                    こうげき → {e.name}
-                  </button>
-                ))}
+            ? battle.enemies.map((e, i) => (
+                <button
+                  key={`attack-${i}`}
+                  disabled={e.hp <= 0}
+                  onClick={() => onSelectTarget(i, selectedSkillId)}
+                >
+                  {skill?.name} → {e.name}
+                </button>
+              ))
+            : battle.enemies.map((e, i) => (
+                <button
+                  key={`t-${i}`}
+                  disabled={e.hp <= 0}
+                  onClick={() => onSelectTarget(i)}
+                >
+                  こうげき → {e.name}
+                </button>
+              ))}
         </div>
       </div>
     </div>
@@ -401,4 +403,3 @@ export function BattleView({
     </div>
   );
 }
-
