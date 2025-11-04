@@ -37,9 +37,30 @@ pnpm preview
 
 ## 📸 デモGIFの作成方法
 
-以下の手順でデモGIFを作成できます：
+### 方法1: 自動生成（推奨）
 
-### 1. アプリを起動
+Puppeteerを使った自動生成スクリプトで簡単にデモGIFを作成できます：
+
+```bash
+# 1. アプリをビルド
+pnpm build
+
+# 2. プレビューサーバーを起動（別ターミナルで）
+pnpm preview
+
+# 3. GIFを生成（別ターミナルで）
+pnpm generate-gif
+```
+
+生成されたGIFは `assets/demo.gif` に保存されます。
+
+**注意:** 初回実行時、Puppeteerが自動的にChromiumをダウンロードします。
+
+### 方法2: 手動キャプチャ
+
+スクリーンキャプチャツールを使って手動で録画することもできます：
+
+#### 1. アプリを起動
 
 ```bash
 pnpm dev
@@ -47,7 +68,7 @@ pnpm dev
 
 ブラウザで http://localhost:5173 にアクセスします。
 
-### 2. スクリーンキャプチャツールを使用
+#### 2. スクリーンキャプチャツールを使用
 
 **Windows:**
 - [ScreenToGif](https://www.screentogif.com/)
@@ -62,11 +83,11 @@ pnpm dev
 - [Peek](https://github.com/phw/peek)
 - [SimpleScreenRecorder](https://www.maartenbaert.be/simplescreenrecorder/) + ffmpegでGIF変換
 
-### 3. GIFを保存
+#### 3. GIFを保存
 
 キャプチャしたGIFを `assets/demo.gif` として保存します。
 
-### 推奨キャプチャ内容
+#### 推奨キャプチャ内容
 
 1. 街で仲間を雇う
 2. ダンジョンに入る
