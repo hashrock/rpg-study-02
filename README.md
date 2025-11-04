@@ -1,73 +1,98 @@
-# React + TypeScript + Vite
+# コマンドRPG（街と洞窟とダンジョン）
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Demo](./assets/demo.gif)
 
-Currently, two official plugins are available:
+React + TypeScript + Viteで作成したブラウザで遊べるコマンドバトルRPGです。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🎮 ゲームの特徴
 
-## React Compiler
+- **街**: 冒険者を雇って仲間にできます（最大3人まで）
+- **洞窟**: ボスと戦って勝利を目指します
+- **ダンジョン**: 奥深くまで進み、イベントやバトルを経験しながら最終ボスに挑みます
+- **戦闘システム**: ターン制バトル、スキル、アイテムシステム
+- **アイテム**: ダンジョンでアイテムを収集して、戦闘や移動中に使用できます
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 セットアップ
 
-## Expanding the ESLint configuration
+```bash
+# 依存関係のインストール
+pnpm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# 開発サーバーの起動
+pnpm dev
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# ビルド
+pnpm build
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# プレビュー
+pnpm preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🛠️ 技術スタック
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- **React 19** - UIライブラリ
+- **TypeScript** - 型安全な開発
+- **Vite** - 高速なビルドツール
+- **ESLint** - コード品質の維持
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 📸 デモGIFの作成方法
+
+以下の手順でデモGIFを作成できます：
+
+### 1. アプリを起動
+
+```bash
+pnpm dev
 ```
+
+ブラウザで http://localhost:5173 にアクセスします。
+
+### 2. スクリーンキャプチャツールを使用
+
+**Windows:**
+- [ScreenToGif](https://www.screentogif.com/)
+- [LICEcap](https://www.cockos.com/licecap/)
+
+**macOS:**
+- [Gifox](https://gifox.app/)
+- [Kap](https://getkap.co/)
+- LICEcap
+
+**Linux:**
+- [Peek](https://github.com/phw/peek)
+- [SimpleScreenRecorder](https://www.maartenbaert.be/simplescreenrecorder/) + ffmpegでGIF変換
+
+### 3. GIFを保存
+
+キャプチャしたGIFを `assets/demo.gif` として保存します。
+
+### 推奨キャプチャ内容
+
+1. 街で仲間を雇う
+2. ダンジョンに入る
+3. 移動してイベント発生
+4. 戦闘シーンを数ターン
+5. アイテム使用
+6. 勝利またはクリア画面
+
+## 📝 開発
+
+このプロジェクトはViteのReact + TypeScriptテンプレートをベースに開発されています。
+
+### プロジェクト構造
+
+```
+src/
+├── game/
+│   ├── components/     # ゲーム画面のコンポーネント
+│   ├── data.ts        # ゲームデータ（キャラクター、敵、アイテム）
+│   ├── logic.ts       # 戦闘ロジック
+│   ├── dungeonLogic.ts # ダンジョンロジック
+│   ├── types.ts       # 型定義
+│   └── Game.tsx       # メインゲームコンポーネント
+└── App.tsx            # アプリケーションルート
+```
+
+## 📄 ライセンス
+
+MIT
