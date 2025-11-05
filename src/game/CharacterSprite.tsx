@@ -2,12 +2,11 @@ import type { Character, Enemy } from "./types";
 
 type SpriteProps = {
   id: string;
-  name: string;
   isBoss?: boolean;
   size?: number;
 };
 
-function CharacterSprite({ id, name, isBoss = false, size = 64 }: SpriteProps) {
+function CharacterSprite({ id, isBoss = false, size = 64 }: SpriteProps) {
   const scale = isBoss ? 1.5 : 1;
   const actualSize = size * scale;
 
@@ -165,10 +164,10 @@ function CharacterSprite({ id, name, isBoss = false, size = 64 }: SpriteProps) {
 }
 
 export function CharacterSpriteComponent({ character, size }: { character: Character; size?: number }) {
-  return <CharacterSprite id={character.id} name={character.name} size={size} />;
+  return <CharacterSprite id={character.id} size={size} />;
 }
 
 export function EnemySpriteComponent({ enemy, size }: { enemy: Enemy; size?: number }) {
-  return <CharacterSprite id={enemy.id} name={enemy.name} isBoss={enemy.isBoss} size={size} />;
+  return <CharacterSprite id={enemy.id} isBoss={enemy.isBoss} size={size} />;
 }
 

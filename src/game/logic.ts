@@ -1,4 +1,4 @@
-import type { BattleActor, BattleAction, BattleState, Character, Enemy, Party, Skill } from './types'
+import type { BattleActor, BattleState, Character, Enemy, Party, Skill } from './types'
 
 export function deepCopyCharacter<T extends Character | Enemy>(c: T): T {
   return { ...c }
