@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BattleView } from './BattleView';
 import type { GameState, Character, Enemy } from '../types';
 import { createHero } from '../data';
@@ -122,13 +122,13 @@ function createMockGameState(
 export const AllyTurnCommandSelect: Story = {
   args: {
     state: createMockGameState([createHero(), createWarrior()], [createGoblin()]),
-    onAllyAction: (actionType, targetIndex, skillId) => {
+    onAllyAction: (actionType: "attack" | "skill", targetIndex?: number, skillId?: string) => {
       console.log('Ally action:', { actionType, targetIndex, skillId });
     },
     onEnemyAuto: () => {
       console.log('Enemy auto action');
     },
-    onUseItem: (itemId, targetIndex) => {
+    onUseItem: (itemId: string, targetIndex?: number) => {
       console.log('Use item:', { itemId, targetIndex });
     },
   },
@@ -149,13 +149,13 @@ export const EnemyTurn: Story = {
       }
       return gameState;
     })(),
-    onAllyAction: (actionType, targetIndex, skillId) => {
+    onAllyAction: (actionType: "attack" | "skill", targetIndex?: number, skillId?: string) => {
       console.log('Ally action:', { actionType, targetIndex, skillId });
     },
     onEnemyAuto: () => {
       console.log('Enemy auto action');
     },
-    onUseItem: (itemId, targetIndex) => {
+    onUseItem: (itemId: string, targetIndex?: number) => {
       console.log('Use item:', { itemId, targetIndex });
     },
   },
@@ -168,13 +168,13 @@ export const MultipleEnemies: Story = {
       [createHero(), createWarrior(), createMage()],
       [createGoblin(), createGoblin()]
     ),
-    onAllyAction: (actionType, targetIndex, skillId) => {
+    onAllyAction: (actionType: "attack" | "skill", targetIndex?: number, skillId?: string) => {
       console.log('Ally action:', { actionType, targetIndex, skillId });
     },
     onEnemyAuto: () => {
       console.log('Enemy auto action');
     },
-    onUseItem: (itemId, targetIndex) => {
+    onUseItem: (itemId: string, targetIndex?: number) => {
       console.log('Use item:', { itemId, targetIndex });
     },
   },
@@ -189,13 +189,13 @@ export const BossBattle: Story = {
       0,
       ['戦闘開始！', '洞窟の主が現れた！']
     ),
-    onAllyAction: (actionType, targetIndex, skillId) => {
+    onAllyAction: (actionType: "attack" | "skill", targetIndex?: number, skillId?: string) => {
       console.log('Ally action:', { actionType, targetIndex, skillId });
     },
     onEnemyAuto: () => {
       console.log('Enemy auto action');
     },
-    onUseItem: (itemId, targetIndex) => {
+    onUseItem: (itemId: string, targetIndex?: number) => {
       console.log('Use item:', { itemId, targetIndex });
     },
   },
@@ -224,13 +224,13 @@ export const DamagedParty: Story = {
         ['戦闘が激化している！', '勇者が10のダメージを受けた！', '戦士が8のダメージを受けた！']
       );
     })(),
-    onAllyAction: (actionType, targetIndex, skillId) => {
+    onAllyAction: (actionType: "attack" | "skill", targetIndex?: number, skillId?: string) => {
       console.log('Ally action:', { actionType, targetIndex, skillId });
     },
     onEnemyAuto: () => {
       console.log('Enemy auto action');
     },
-    onUseItem: (itemId, targetIndex) => {
+    onUseItem: (itemId: string, targetIndex?: number) => {
       console.log('Use item:', { itemId, targetIndex });
     },
   },
@@ -254,13 +254,13 @@ export const AllyDefeated: Story = {
         ['戦士が倒れた！']
       );
     })(),
-    onAllyAction: (actionType, targetIndex, skillId) => {
+    onAllyAction: (actionType: "attack" | "skill", targetIndex?: number, skillId?: string) => {
       console.log('Ally action:', { actionType, targetIndex, skillId });
     },
     onEnemyAuto: () => {
       console.log('Enemy auto action');
     },
-    onUseItem: (itemId, targetIndex) => {
+    onUseItem: (itemId: string, targetIndex?: number) => {
       console.log('Use item:', { itemId, targetIndex });
     },
   },
