@@ -38,9 +38,11 @@ const COMMON_STYLES = {
 function BattleScreen({
   allies,
   enemies,
+  log,
 }: {
   allies: NonNullable<GameState["battle"]>["allies"];
   enemies: NonNullable<GameState["battle"]>["enemies"];
+  log: string[];
 }) {
   return (
     <div
@@ -123,6 +125,33 @@ function BattleScreen({
           </div>
         ))}
       </div>
+
+      {/* バトルログ（下部に重ねて透過表示） */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
+          backdropFilter: "blur(4px)",
+          padding: "0.5rem",
+          maxHeight: "120px",
+          overflowY: "auto",
+        }}
+      >
+        <div
+          style={{
+            fontSize: "0.875rem",
+            color: "#fff",
+            lineHeight: "1.4",
+          }}
+        >
+          {log.slice(-6).map((line, idx) => (
+            <div key={idx}>{line}</div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -189,33 +218,6 @@ function BattleStatus({
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function BattleLog({ log }: { log: string[] }) {
-  return (
-    <div
-      style={{
-        marginTop: "1rem",
-        textAlign: "left",
-        maxWidth: 640,
-        marginInline: "auto",
-      }}
-    >
-      <h4>ログ</h4>
-      <div
-        style={{
-          border: "1px solid #444",
-          padding: "0.5rem",
-          borderRadius: 8,
-          minHeight: 80,
-        }}
-      >
-        {log.slice(-6).map((line, idx) => (
-          <div key={idx}>{line}</div>
-        ))}
       </div>
     </div>
   );
@@ -592,10 +594,13 @@ export function BattleView({
   // 統一されたレイアウト構造
   return (
     <div>
-      <BattleScreen allies={battle.allies} enemies={battle.enemies} />
+      <BattleScreen
+        allies={battle.allies}
+        enemies={battle.enemies}
+        log={battle.log}
+      />
       <BattleStatus allies={battle.allies} enemies={battle.enemies} />
       {renderCommandArea()}
-      <BattleLog log={battle.log} />
     </div>
   );
 }
