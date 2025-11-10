@@ -465,7 +465,6 @@ export function BattleView({
   if (isAllyTurn && currentActor && commandMode === "select") {
     return (
       <div>
-        <h2>バトル</h2>
         <BattleStatus allies={battle.allies} enemies={battle.enemies} />
         <CommandSelectView
           currentActor={currentActor}
@@ -482,7 +481,6 @@ export function BattleView({
   if (isAllyTurn && currentActor && commandMode === "item") {
     return (
       <div>
-        <h2>バトル</h2>
         <BattleStatus allies={battle.allies} enemies={battle.enemies} />
         <ItemSelectView
           inventory={state.inventory}
@@ -502,7 +500,6 @@ export function BattleView({
   ) {
     return (
       <div>
-        <h2>バトル</h2>
         <BattleStatus allies={battle.allies} enemies={battle.enemies} />
         <ItemTargetSelectView
           itemId={selectedItemId}
@@ -518,7 +515,6 @@ export function BattleView({
   if (isAllyTurn && currentActor && commandMode === "skill") {
     return (
       <div>
-        <h2>バトル</h2>
         <BattleStatus allies={battle.allies} enemies={battle.enemies} />
         <SkillSelectView
           currentActor={currentActor}
