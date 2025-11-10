@@ -15,9 +15,9 @@ const COMMON_STYLES = {
   buttonContainer: {
     display: "flex",
     gap: "0.5rem",
-    justifyContent: "center",
     flexWrap: "wrap" as const,
     marginTop: "0.5rem",
+    justifyContent: "start",
   },
   characterCard: {
     display: "flex",
