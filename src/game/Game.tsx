@@ -1,7 +1,15 @@
 import { useState } from "react";
 import type { GameState } from "./types";
 import { type Character, type Enemy } from "./types";
-import { createCaveBoss, createInitialParty, createEmptyInventory, getItemById, removeItemFromInventory, getRandomItem, addItemToInventory } from "./data";
+import {
+  createCaveBoss,
+  createInitialParty,
+  createEmptyInventory,
+  getItemById,
+  removeItemFromInventory,
+  getRandomItem,
+  addItemToInventory,
+} from "./data";
 import {
   advanceTurn,
   applyAttack,
@@ -32,7 +40,12 @@ export default function Game() {
   }));
 
   function resetToTown() {
-    setState({ location: "TOWN", mode: "FIELD", party: createInitialParty(), inventory: createEmptyInventory() });
+    setState({
+      location: "TOWN",
+      mode: "FIELD",
+      party: createInitialParty(),
+      inventory: createEmptyInventory(),
+    });
   }
 
   function handleHire(c: Character) {
@@ -75,7 +88,11 @@ export default function Game() {
     setState((prev) => {
       if (!prev.dungeon) return prev;
       const newDungeon = advanceDungeonStep(prev.dungeon, "forward");
-      const event = checkDungeonEvent(newDungeon.step, newDungeon, prev.inventory);
+      const event = checkDungeonEvent(
+        newDungeon.step,
+        newDungeon,
+        prev.inventory
+      );
 
       if (event.event) {
         return {
@@ -99,7 +116,11 @@ export default function Game() {
     setState((prev) => {
       if (!prev.dungeon) return prev;
       const newDungeon = advanceDungeonStep(prev.dungeon, "backward");
-      const event = checkDungeonEvent(newDungeon.step, newDungeon, prev.inventory);
+      const event = checkDungeonEvent(
+        newDungeon.step,
+        newDungeon,
+        prev.inventory
+      );
 
       if (event.event) {
         return {
@@ -282,7 +303,8 @@ export default function Game() {
       if (!item) return prev;
 
       // アイテムの所持数を確認
-      const currentQuantity = prev.inventory.items.find(i => i.itemId === itemId)?.quantity || 0;
+      const currentQuantity =
+        prev.inventory.items.find((i) => i.itemId === itemId)?.quantity || 0;
       if (currentQuantity <= 0) return prev; // アイテムが無い場合は何もしない
 
       // インベントリからアイテムを削除
@@ -329,8 +351,11 @@ export default function Game() {
       if (prev.mode === "FIELD") {
         const party = { ...prev.party };
         let target: Character;
-        
-        if (targetIndex != null && targetIndex < [party.hero, ...party.companions].length) {
+
+        if (
+          targetIndex != null &&
+          targetIndex < [party.hero, ...party.companions].length
+        ) {
           const members = [party.hero, ...party.companions];
           target = members[targetIndex];
         } else {
@@ -360,10 +385,14 @@ export default function Game() {
   function handleCollectItem() {
     setState((prev) => {
       if (!prev.dungeon || !prev.dungeon.canCollectItem) return prev;
-      
+
       const collectedItem = getRandomItem();
-      const newInventory = addItemToInventory(prev.inventory, collectedItem.id, 1);
-      
+      const newInventory = addItemToInventory(
+        prev.inventory,
+        collectedItem.id,
+        1
+      );
+
       return {
         ...prev,
         dungeon: {
@@ -388,7 +417,6 @@ export default function Game() {
 
   return (
     <div>
-      <h1>コマンドRPG（街と洞窟とダンジョン）</h1>
       {state.mode === "FIELD" && state.location === "TOWN" && (
         <TownView
           state={state}
@@ -397,17 +425,19 @@ export default function Game() {
           onHire={handleHire}
         />
       )}
-      {state.mode === "FIELD" && state.location === "DUNGEON" && state.dungeon && (
-        <DungeonView
-          state={state}
-          onMoveForward={handleDungeonMoveForward}
-          onMoveBackward={handleDungeonMoveBackward}
-          onReturnToTown={returnToTownFromDungeon}
-          onUseItem={handleUseItem}
-          onCollectItem={handleCollectItem}
-          onClearCollectedItem={clearCollectedItem}
-        />
-      )}
+      {state.mode === "FIELD" &&
+        state.location === "DUNGEON" &&
+        state.dungeon && (
+          <DungeonView
+            state={state}
+            onMoveForward={handleDungeonMoveForward}
+            onMoveBackward={handleDungeonMoveBackward}
+            onReturnToTown={returnToTownFromDungeon}
+            onUseItem={handleUseItem}
+            onCollectItem={handleCollectItem}
+            onClearCollectedItem={clearCollectedItem}
+          />
+        )}
       {state.mode === "EVENT" && state.event && (
         <EventView
           state={state}
