@@ -441,9 +441,9 @@ function EnemyTurnView({ onAdvance }: { onAdvance: () => void }) {
   return (
     <div style={COMMON_STYLES.commandArea}>
       <div>
-        <div>敵の行動待ち…</div>
+        <div>敵の行動中…</div>
         <div style={{ marginTop: "0.5rem" }}>
-          <button onClick={onAdvance}>進める</button>
+          <button onClick={onAdvance}>手動で進める</button>
         </div>
       </div>
     </div>
@@ -483,6 +483,16 @@ export function BattleView({
     setSelectedSkillId(null);
     setSelectedItemId(null);
   }, [battle.turnIndex]);
+
+  // 敵のターンになったら自動で進める
+  useEffect(() => {
+    if (isEnemyTurn) {
+      const timer = setTimeout(() => {
+        onEnemyAuto();
+      }, 500); // 0.5秒後に自動実行
+      return () => clearTimeout(timer);
+    }
+  }, [isEnemyTurn, onEnemyAuto]);
 
   const handleSelectAttack = () => setCommandMode("target");
   const handleSelectSkill = () => setCommandMode("skill");
