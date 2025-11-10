@@ -6,6 +6,35 @@ import {
 } from "../CharacterSprite";
 import { items, getItemQuantity } from "../data";
 
+// 共通スタイル定数
+const COMMON_STYLES = {
+  commandArea: {
+    marginTop: "1rem",
+    minHeight: 80,
+  },
+  buttonContainer: {
+    display: "flex",
+    gap: "0.5rem",
+    justifyContent: "center",
+    flexWrap: "wrap" as const,
+    marginTop: "0.5rem",
+  },
+  characterCard: {
+    display: "flex",
+    flexDirection: "column" as const,
+    alignItems: "center",
+    gap: "0.5rem",
+    borderRadius: 8,
+    padding: "0.75rem",
+  },
+  partyContainer: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "1rem",
+    alignItems: "center",
+  },
+} as const;
+
 function BattleStatus({
   allies,
   enemies,
@@ -24,26 +53,14 @@ function BattleStatus({
       }}
     >
       <div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            alignItems: "center",
-          }}
-        >
+        <div style={COMMON_STYLES.partyContainer}>
           {allies.map((a, i) => (
             <div
               key={`a-${i}`}
               style={{
+                ...COMMON_STYLES.characterCard,
                 opacity: a.hp > 0 ? 1 : 0.5,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.5rem",
                 border: a.hp > 0 ? "2px solid #4a90e2" : "2px solid #888",
-                borderRadius: 8,
-                padding: "0.75rem",
               }}
             >
               <CharacterSpriteComponent character={a} size={64} />
@@ -59,26 +76,14 @@ function BattleStatus({
         </div>
       </div>
       <div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-            alignItems: "center",
-          }}
-        >
+        <div style={COMMON_STYLES.partyContainer}>
           {enemies.map((e, i) => (
             <div
               key={`e-${i}`}
               style={{
+                ...COMMON_STYLES.characterCard,
                 opacity: e.hp > 0 ? 1 : 0.5,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "0.5rem",
                 border: e.hp > 0 ? "2px solid #ff4444" : "2px solid #888",
-                borderRadius: 8,
-                padding: "0.75rem",
               }}
             >
               <EnemySpriteComponent enemy={e} size={e.isBoss ? 96 : 64} />
@@ -137,18 +142,10 @@ function CommandSelectView({
   onSelectItem: () => void;
 }) {
   return (
-    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+    <div style={COMMON_STYLES.commandArea}>
       <div>
         <div>行動選択：{currentActor.name}</div>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginTop: "0.5rem",
-          }}
-        >
+        <div style={COMMON_STYLES.buttonContainer}>
           <button onClick={onSelectAttack}>こうげき</button>
           <button onClick={onSelectSkill}>特技</button>
           <button onClick={onSelectItem}>アイテム</button>
@@ -169,18 +166,10 @@ function SkillSelectView({
   onSelectSkill: (skillId: string) => void;
 }) {
   return (
-    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+    <div style={COMMON_STYLES.commandArea}>
       <div>
         <div>特技選択：{currentActor.name}</div>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginTop: "0.5rem",
-          }}
-        >
+        <div style={COMMON_STYLES.buttonContainer}>
           <button onClick={onBack}>戻る</button>
           {currentActor.skills.map((skill) => {
             const canUse = currentActor.mp >= skill.mpCost;
@@ -197,7 +186,7 @@ function SkillSelectView({
           })}
         </div>
         {currentActor.skills.length === 0 && (
-          <div>使用可能な特技がありません</div>
+          <div style={{ marginTop: "0.5rem" }}>使用可能な特技がありません</div>
         )}
       </div>
     </div>
@@ -224,22 +213,14 @@ function TargetSelectView({
     : null;
 
   return (
-    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+    <div style={COMMON_STYLES.commandArea}>
       <div>
         <div>
           {selectedSkillId
             ? `ターゲット選択：${currentActor.name}の${skill?.name}`
             : `ターゲット選択：${currentActor.name}`}
         </div>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginTop: "0.5rem",
-          }}
-        >
+        <div style={COMMON_STYLES.buttonContainer}>
           <button onClick={onBack}>戻る</button>
           {isHeal
             ? battle.allies.map((a, i) => (
@@ -293,18 +274,10 @@ function ItemSelectView({
   );
 
   return (
-    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+    <div style={COMMON_STYLES.commandArea}>
       <div>
         <div>アイテム選択</div>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginTop: "0.5rem",
-          }}
-        >
+        <div style={COMMON_STYLES.buttonContainer}>
           <button onClick={onBack}>戻る</button>
           {availableItems.map((item) => {
             const quantity = getItemQuantity(inventory, item.id);
@@ -345,18 +318,10 @@ function ItemTargetSelectView({
     item?.effect.type === "heal" || item?.effect.type === "mp_heal";
 
   return (
-    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+    <div style={COMMON_STYLES.commandArea}>
       <div>
         <div>ターゲット選択：{item?.name}</div>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            marginTop: "0.5rem",
-          }}
-        >
+        <div style={COMMON_STYLES.buttonContainer}>
           <button onClick={onBack}>戻る</button>
           {isHeal &&
             battle.allies.map((a, i) => (
@@ -380,7 +345,7 @@ function ItemTargetSelectView({
 
 function EnemyTurnView({ onAdvance }: { onAdvance: () => void }) {
   return (
-    <div style={{ marginTop: "1rem", minHeight: 80 }}>
+    <div style={COMMON_STYLES.commandArea}>
       <div>
         <div>敵の行動待ち…</div>
         <div style={{ marginTop: "0.5rem" }}>
@@ -462,95 +427,81 @@ export function BattleView({
     }
   };
 
-  if (isAllyTurn && currentActor && commandMode === "select") {
-    return (
-      <div>
-        <BattleStatus allies={battle.allies} enemies={battle.enemies} />
-        <CommandSelectView
-          currentActor={currentActor}
-          inventory={state.inventory}
-          onSelectAttack={handleSelectAttack}
-          onSelectSkill={handleSelectSkill}
-          onSelectItem={handleSelectItem}
-        />
-        <BattleLog log={battle.log} />
-      </div>
-    );
-  }
+  // コマンドエリアのレンダリング
+  const renderCommandArea = () => {
+    if (isAllyTurn && currentActor) {
+      switch (commandMode) {
+        case "select":
+          return (
+            <CommandSelectView
+              currentActor={currentActor}
+              inventory={state.inventory}
+              onSelectAttack={handleSelectAttack}
+              onSelectSkill={handleSelectSkill}
+              onSelectItem={handleSelectItem}
+            />
+          );
+        case "skill":
+          return (
+            <SkillSelectView
+              currentActor={currentActor}
+              onBack={handleBackToSelect}
+              onSelectSkill={handleSkillSelect}
+            />
+          );
+        case "target": {
+          const skill = selectedSkillId
+            ? currentActor.skills.find((s) => s.id === selectedSkillId)
+            : null;
+          const isHeal = skill?.type === "heal";
+          return (
+            <TargetSelectView
+              currentActor={currentActor}
+              battle={battle}
+              selectedSkillId={selectedSkillId}
+              isHeal={isHeal}
+              onBack={selectedSkillId ? handleBackToSkill : handleBackToSelect}
+              onSelectTarget={handleTargetSelect}
+            />
+          );
+        }
+        case "item":
+          return (
+            <ItemSelectView
+              inventory={state.inventory}
+              onBack={handleBackToSelect}
+              onSelectItem={handleItemSelect}
+            />
+          );
+        case "itemTarget":
+          if (selectedItemId) {
+            return (
+              <ItemTargetSelectView
+                itemId={selectedItemId}
+                battle={battle}
+                onBack={handleBackToItem}
+                onSelectTarget={handleItemTargetSelect}
+              />
+            );
+          }
+          return null;
+        default:
+          return null;
+      }
+    }
 
-  if (isAllyTurn && currentActor && commandMode === "item") {
-    return (
-      <div>
-        <BattleStatus allies={battle.allies} enemies={battle.enemies} />
-        <ItemSelectView
-          inventory={state.inventory}
-          onBack={handleBackToSelect}
-          onSelectItem={handleItemSelect}
-        />
-        <BattleLog log={battle.log} />
-      </div>
-    );
-  }
+    if (isEnemyTurn) {
+      return <EnemyTurnView onAdvance={onEnemyAuto} />;
+    }
 
-  if (
-    isAllyTurn &&
-    currentActor &&
-    commandMode === "itemTarget" &&
-    selectedItemId
-  ) {
-    return (
-      <div>
-        <BattleStatus allies={battle.allies} enemies={battle.enemies} />
-        <ItemTargetSelectView
-          itemId={selectedItemId}
-          battle={battle}
-          onBack={handleBackToItem}
-          onSelectTarget={handleItemTargetSelect}
-        />
-        <BattleLog log={battle.log} />
-      </div>
-    );
-  }
+    return null;
+  };
 
-  if (isAllyTurn && currentActor && commandMode === "skill") {
-    return (
-      <div>
-        <BattleStatus allies={battle.allies} enemies={battle.enemies} />
-        <SkillSelectView
-          currentActor={currentActor}
-          onBack={handleBackToSelect}
-          onSelectSkill={handleSkillSelect}
-        />
-        <BattleLog log={battle.log} />
-      </div>
-    );
-  }
-
-  if (isAllyTurn && currentActor && commandMode === "target") {
-    const skill = selectedSkillId
-      ? currentActor.skills.find((s) => s.id === selectedSkillId)
-      : null;
-    const isHeal = skill?.type === "heal";
-    return (
-      <div>
-        <BattleStatus allies={battle.allies} enemies={battle.enemies} />
-        <TargetSelectView
-          currentActor={currentActor}
-          battle={battle}
-          selectedSkillId={selectedSkillId}
-          isHeal={isHeal}
-          onBack={selectedSkillId ? handleBackToSkill : handleBackToSelect}
-          onSelectTarget={handleTargetSelect}
-        />
-        <BattleLog log={battle.log} />
-      </div>
-    );
-  }
-
+  // 統一されたレイアウト構造
   return (
     <div>
       <BattleStatus allies={battle.allies} enemies={battle.enemies} />
-      {isEnemyTurn && <EnemyTurnView onAdvance={onEnemyAuto} />}
+      {renderCommandArea()}
       <BattleLog log={battle.log} />
     </div>
   );
