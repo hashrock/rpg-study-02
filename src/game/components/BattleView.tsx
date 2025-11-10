@@ -24,7 +24,6 @@ function BattleStatus({
       }}
     >
       <div>
-        <h3>味方</h3>
         <div
           style={{
             display: "flex",
@@ -60,7 +59,6 @@ function BattleStatus({
         </div>
       </div>
       <div>
-        <h3>敵</h3>
         <div
           style={{
             display: "flex",
@@ -539,7 +537,6 @@ export function BattleView({
     const isHeal = skill?.type === "heal";
     return (
       <div>
-        <h2>バトル</h2>
         <BattleStatus allies={battle.allies} enemies={battle.enemies} />
         <TargetSelectView
           currentActor={currentActor}
@@ -556,7 +553,6 @@ export function BattleView({
 
   return (
     <div>
-      <h2>バトル</h2>
       <BattleStatus allies={battle.allies} enemies={battle.enemies} />
       {isEnemyTurn && <EnemyTurnView onAdvance={onEnemyAuto} />}
       <BattleLog log={battle.log} />
