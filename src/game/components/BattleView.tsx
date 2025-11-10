@@ -29,11 +29,103 @@ const COMMON_STYLES = {
   },
   partyContainer: {
     display: "flex",
-    flexDirection: "column" as const,
+    flexDirection: "row" as const,
     gap: "1rem",
     alignItems: "center",
   },
 } as const;
+
+function BattleScreen({
+  allies,
+  enemies,
+}: {
+  allies: NonNullable<GameState["battle"]>["allies"];
+  enemies: NonNullable<GameState["battle"]>["enemies"];
+}) {
+  return (
+    <div
+      style={{
+        width: 600,
+        height: 400,
+        position: "relative",
+        margin: "0 auto",
+        border: "2px solid #333",
+        borderRadius: 8,
+        overflow: "hidden",
+        background:
+          "linear-gradient(to bottom, #87CEEB 0%, #98D8C8 50%, #6B8E23 100%)",
+      }}
+    >
+      {/* 背景装飾 */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage:
+            "radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.1) 0%, transparent 50%)",
+        }}
+      />
+
+      {/* 味方キャラクター（左側） */}
+      <div
+        style={{
+          position: "absolute",
+          left: 50,
+          bottom: 50,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          alignItems: "center",
+        }}
+      >
+        {allies.map((ally, i) => (
+          <div
+            key={`battle-ally-${i}`}
+            style={{
+              opacity: ally.hp > 0 ? 1 : 0.3,
+              transform: `translateY(${i * -20}px)`,
+              transition: "opacity 0.3s",
+            }}
+          >
+            <CharacterSpriteComponent character={ally} size={80} />
+          </div>
+        ))}
+      </div>
+
+      {/* 敵キャラクター（右側） */}
+      <div
+        style={{
+          position: "absolute",
+          right: 50,
+          bottom: 50,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          alignItems: "center",
+        }}
+      >
+        {enemies.map((enemy, i) => (
+          <div
+            key={`battle-enemy-${i}`}
+            style={{
+              opacity: enemy.hp > 0 ? 1 : 0.3,
+              transform: `translateY(${i * -20}px)`,
+              transition: "opacity 0.3s",
+            }}
+          >
+            <EnemySpriteComponent
+              enemy={enemy}
+              size={enemy.isBoss ? 120 : 80}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function BattleStatus({
   allies,
@@ -500,6 +592,7 @@ export function BattleView({
   // 統一されたレイアウト構造
   return (
     <div>
+      <BattleScreen allies={battle.allies} enemies={battle.enemies} />
       <BattleStatus allies={battle.allies} enemies={battle.enemies} />
       {renderCommandArea()}
       <BattleLog log={battle.log} />
